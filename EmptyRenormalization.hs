@@ -52,8 +52,10 @@ newton2d f idf z0 = snd $ head $ dropWhile converging $ zip zs (tail zs)
 -- Given c and return times (a,b), find (u,v) such that quadratic Lorenz with
 -- parameters (c,u,v) has (a,b)-renormalization which is empty.
 solve_uv' :: ReturnTimes -> R -> R2
-solve_uv' (a,b) c = newton2d f idf ((1+c)/2, 1-c/2)
+solve_uv' (a,b) c = newton2d f idf guess
   where
+    -- Initial guess is the solution for full quadratic Lorenz map
+    guess = ( iterate (iq1 c 1 1) c !! a, 1 - iterate (iq0 c 1 1) c !! b )
     f (u,v) = ( iterate (q1 c u v) u !! a - c
               , iterate (q0 c u v) (1-v) !! b - c )
     idf (u,v) (u',v') = ( (d11*u' - d01*v')/det
@@ -67,14 +69,16 @@ solve_uv' (a,b) c = newton2d f idf ((1+c)/2, 1-c/2)
         uorb = take a $ iterate (q1 c u v) u
         vorb = take b $ iterate (q0 c u v) (1-v)
 
-solve_p' b c u v = newton1d f df $ (c + iq0 c u v c)/2
+solve_p' (a,b) c u v = newton1d f df $ (c + iq0 c u v c)/2
   where
+    -- eta = iterate (iq1 c u v) c !! (a-1)
     f x = iterate (q1 c u v) (q0 c u v x) !! b - x
     df x = let xs = take b $ iterate (q1 c u v) (q0 c u v x)
            in product (map (dq1 c u v) xs) * dq0 c u v x - 1
 
-solve_q' a c u v = newton1d f df $ (c + iq1 c u v c)/2
+solve_q' (a,b) c u v = newton1d f df $ (c + iq1 c u v c)/2
   where
+    -- xi = iterate (iq0 c u v) c !! (b-1)
     f x = iterate (q0 c u v) (q1 c u v x) !! a - x
     df x = let xs = take a $ iterate (q0 c u v) (q1 c u v x)
            in product (map (dq0 c u v) xs) * dq1 c u v x - 1
@@ -114,13 +118,18 @@ grid n = map ((/ fromIntegral (n+1)) . fromIntegral) [1..n]
 dyadicGrid :: Int -> [Double]
 dyadicGrid n = map ((2**) . negate . fromIntegral) [1..n]
 
-solve_all' (a,b) c = [1-v, iq0 c u v c, p, c, q, iq1 c u v c, u, dist0, dist1]
+solve_all' ab@(a,b) c =
+  [1-v, iq0 c u v c, p, c, q, iq1 c u v c, u, dist0, dist1]
   where
-    (u,v) = solve_uv' (a,b) c
-    p = solve_p' b c u v
-    q = solve_q' a c u v
-    dist0 = log ( dq0 c u v (iq0 c u v p) / dq0 c u v (iq0 c u v q) )
-    dist1 = log ( dq1 c u v (iq1 c u v q) / dq1 c u v (iq1 c u v p) )
+    (u,v) = solve_uv' ab c
+    p = solve_p' ab c u v
+    q = solve_q' ab c u v
+    l0 = product $ map (dq0 c u v) $ take b . tail $ iterate (iq0 c u v) p
+    r0 = product $ map (dq0 c u v) $ take b . tail $ iterate (iq0 c u v) q
+    l1 = product $ map (dq1 c u v) $ take a . tail $ iterate (iq1 c u v) p
+    r1 = product $ map (dq1 c u v) $ take a . tail $ iterate (iq1 c u v) q
+    dist0 = log $ l0 / r0
+    dist1 = log $ r1 / l1
 
 solve_all c = [1-v, iq0 c u v c, p, c, q, iq1 c u v c, u, dist0, dist1]
   where

@@ -25,7 +25,7 @@ print(qplot(c, ratio, data=dg, geom='line', col=side,
 
 dg$ratio = c( (df$c-df$p)/(1-df$c), (df$q-df$c)/df$c )
 dg$side = rep(c('L/[c,1]', 'R/[0,c]'), each=nrow(df))
-print(qplot(c, ratio, data=dg, geom='line', col=side,
+print(qplot(c, ratio, data=dg, geom='line', col=side, log="y",
             main="Relative length of L in [c,1] and R in [0,c]"))
 dev.off()
 
@@ -39,5 +39,6 @@ dev.off()
 
 pdf.a4r(path('crenorm.pdf'))
 print(qplot(c, (c-p)/(q-p), data=df, geom='line',
-            main="Critical value of the renormalization"))
+            main="Critical value of the renormalization") +
+      geom_abline(intercept=0, slope=1, col='gray'))
 dev.off()
