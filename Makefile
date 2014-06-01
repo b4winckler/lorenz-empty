@@ -1,7 +1,8 @@
-all: hyperbolic.pdf crenorm.pdf
+all: data/hyperbolic.pdf data/crenorm.pdf
 
-empty.txt: EmptyRenormalization.hs
-	runhaskell EmptyRenormalization.hs 1000 > empty.txt
+data/empty.txt: EmptyRenormalization.hs
+	@mkdir -p data
+	runhaskell EmptyRenormalization.hs 1000 > data/empty.txt
 
-%.pdf: empty.txt gengraphs.R
+data/%.pdf: data/empty.txt gengraphs.R
 	Rscript gengraphs.R
