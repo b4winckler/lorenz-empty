@@ -23,10 +23,10 @@ dg = data.frame(c=rep(df$c, 2),
 print(qplot(c, ratio, data=dg, geom='line', col=side,
             main="Relative length of R in [0,u] and L in [vconj,1]"))
 
-dg$ratio = c( (df$c-df$p)/(df$c-df$xi1), (df$q-df$c)/(df$eta1-df$c) )
-dg$side = rep(c('L/[xi1,c]', 'R/[eta1,c]'), each=nrow(df))
+dg$ratio = c( (df$c-df$p)/(1-df$c), (df$q-df$c)/df$c )
+dg$side = rep(c('L/[c,1]', 'R/[0,c]'), each=nrow(df))
 print(qplot(c, ratio, data=dg, geom='line', col=side,
-            main="Relative length of L in [xi1,c] and R in [c,eta1]"))
+            main="Relative length of L in [c,1] and R in [0,c]"))
 dev.off()
 
 pdf.a4r(path('distortion.pdf'))
