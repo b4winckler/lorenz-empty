@@ -1,0 +1,17 @@
+# Description
+
+This repository contains programs to calculate parameters for Lorenz maps which
+renormalize to empty maps (i.e. where both branches are trivial).
+
+# Usage
+
+Type `make` to generate data and figures.  This requires
+[`runhaskell`](http://www.haskell.org/platform/) and
+[`Rscript`](http://www.r-project.org/) to be installed.
+
+# License
+
+Copyright 2014 Björn Winckler.
+
+This work is licensed under a [Creative Commons Attribution 4.0 International
+License](http://creativecommons.org/licenses/by/4.0/).
