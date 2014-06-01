@@ -2,12 +2,13 @@
 
 module Main where
 
+import Control.Monad (when)
+import Data.List (foldl')
 import System.Environment (getArgs, getProgName)
 import System.Exit (exitFailure)
-import Data.List (foldl')
-import Control.Monad (when)
-import qualified Data.Csv as Csv
+import System.IO (hPutStrLn, stderr)
 import qualified Data.ByteString.Lazy as B
+import qualified Data.Csv as Csv
 
 type R = Double
 type MapR = R -> R
@@ -136,14 +137,16 @@ toCsv x = Csv.encodeWith encodeOpt x
       , Csv.encUseCrLf = False
       }
 
+logStrLn = hPutStrLn stderr
+
 main = do
   as <- getArgs
   when (length as /= 3) $ do
     progName <- getProgName
-    putStrLn $ "usage: " ++ progName ++ " A B N"
-    putStrLn "    A       return time on right"
-    putStrLn "    B       return time on left"
-    putStrLn "    N       number of grid points"
+    logStrLn $ "usage: " ++ progName ++ " A B N"
+    logStrLn "    A       return time on right"
+    logStrLn "    B       return time on left"
+    logStrLn "    N       number of grid points"
     exitFailure
 
   let a = read $ as !! 0 :: Int
